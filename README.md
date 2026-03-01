@@ -49,3 +49,4 @@ kubectl logs -n openclaw -l app=openclaw -f
 - ConfigMap mounts `openclaw.json` read-only; runtime changes go to PVC
 - The Slack channel config references env vars for tokens, but OpenClaw
   also reads them from the config file. The env vars take precedence.
+# 2026-03-01T11:51:18Z

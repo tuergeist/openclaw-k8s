@@ -18,9 +18,11 @@ spec:
         app: openclaw
     spec:
       serviceAccountName: openclaw
+      imagePullSecrets:
+        - name: ghcr-pull
       containers:
         - name: openclaw
-          image: registry.gitlab.com/gauvendi/infrastructure/openclaw:latest
+          image: ghcr.io/tuergeist/openclaw-k8s:sha-49516db
           ports:
             - containerPort: 18789
               name: gateway
@@ -47,6 +49,11 @@ spec:
                   name: openclaw-slack
                   key: SLACK_APP_TOKEN
             # Docker host for DinD sidecar
+            - name: MISTRAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-secrets
+                  key: MISTRAL_API_KEY
             - name: DOCKER_HOST
               value: tcp://localhost:2375
           resources:
