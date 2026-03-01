@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openclaw-config
+  namespace: openclaw
+data:
+  openclaw.json: |
+    {
+      "auth": {
+        "profiles": {
+          "anthropic:cb-vsx": {
+            "provider": "anthropic",
+            "mode": "token"
+          }
+        }
+      },
+      "agents": {
+        "defaults": {
+          "model": {
+            "primary": "anthropic/claude-opus-4-6"
+          },
+          "models": {
+            "anthropic/claude-opus-4-6": {}
+          },
+          "compaction": {
+            "mode": "safeguard"
+          },
+          "maxConcurrent": 4,
+          "subagents": {
+            "maxConcurrent": 8
+          }
+        }
+      },
+      "messages": {
+        "ackReactionScope": "group-mentions"
+      },
+      "commands": {
+        "native": "auto",
+        "nativeSkills": "auto",
+        "restart": true,
+        "ownerDisplay": "raw"
+      },
+      "session": {
+        "dmScope": "per-channel-peer"
+      },
+      "hooks": {
+        "internal": {
+          "enabled": true,
+          "entries": {
+            "boot-md": { "enabled": true },
+            "bootstrap-extra-files": { "enabled": true },
+            "command-logger": { "enabled": true },
+            "session-memory": { "enabled": true }
+          }
+        }
+      },
+      "channels": {
+        "slack": {
+          "mode": "socket",
+          "enabled": true,
+          "allowBots": true,
+          "groupPolicy": "allowlist",
+          "streaming": "partial",
+          "nativeStreaming": true,
+          "channels": {
+            "#lobster": { "allow": true }
+          }
+        }
+      },
+      "gateway": {
+        "port": 18789,
+        "mode": "local",
+        "bind": "lan",
+        "auth": {
+          "mode": "token"
+        },
+        "tailscale": {
+          "mode": "off"
+        }
+      },
+      "skills": {
+        "install": {
+          "nodeManager": "npm"
+        }
+      },
+      "plugins": {
+        "entries": {
+          "slack": { "enabled": true }
+        }
+      }
+    }

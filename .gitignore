@@ -1,0 +1,7 @@
+# Never commit actual secrets
+secret.yaml
+slack-secret.yaml
+
+# Build artifacts
+*.tar
+*.gz

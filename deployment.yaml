@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: openclaw
+  labels:
+    app: openclaw
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # Single instance — no rolling needed
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      serviceAccountName: openclaw
+      containers:
+        - name: openclaw
+          image: registry.gitlab.com/gauvendi/infrastructure/openclaw:latest
+          ports:
+            - containerPort: 18789
+              name: gateway
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-secrets
+                  key: ANTHROPIC_API_KEY
+            - name: OPENCLAW_GATEWAY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-secrets
+                  key: OPENCLAW_GATEWAY_TOKEN
+            # Slack tokens — OpenClaw reads these from config, but env override works too
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-slack
+                  key: SLACK_BOT_TOKEN
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-slack
+                  key: SLACK_APP_TOKEN
+            # Docker host for DinD sidecar
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: home
+              mountPath: /home/node/.openclaw
+            - name: config
+              mountPath: /home/node/.openclaw/openclaw.json
+              subPath: openclaw.json
+          livenessProbe:
+            httpGet:
+              port: 18789
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 18789
+              path: /health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+        # Docker-in-Docker sidecar for sandbox/agent isolation
+        - name: dind
+          image: docker:27-dind
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""  # No TLS for localhost communication
+          volumeMounts:
+            - name: dind-storage
+              mountPath: /var/lib/docker
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: openclaw-home
+        - name: config
+          configMap:
+            name: openclaw-config
+        - name: dind-storage
+          emptyDir: {}
