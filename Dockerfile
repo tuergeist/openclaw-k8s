@@ -59,6 +59,12 @@ RUN ARCH=$(dpkg --print-architecture) && \
 #     node /app/node_modules/playwright-core/cli.js install --with-deps chromium && \
 #     chown -R node:node /home/node/.cache/ms-playwright
 
+# OpenSpec (spec-driven development framework)
+RUN npm install -g @fission-ai/openspec@latest
+
+# Spec-Kit (GitHub spec-driven development toolkit)
+RUN PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install "specify-cli @ git+https://github.com/github/spec-kit.git"
+
 WORKDIR /app
 COPY --from=builder /app /app
 RUN ln -sf /app/openclaw.mjs /usr/local/bin/openclaw && chmod 755 /app/openclaw.mjs
