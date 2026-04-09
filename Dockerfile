@@ -59,6 +59,10 @@ RUN ARCH=$(dpkg --print-architecture) && \
 #     node /app/node_modules/playwright-core/cli.js install --with-deps chromium && \
 #     chown -R node:node /home/node/.cache/ms-playwright
 
+# Python dependencies for trading bot
+RUN pip3 install --break-system-packages numpy>=2.0.0 requests>=2.33.0 gspread>=6.0.0 \
+    google-auth>=2.0.0 eth-account>=0.13.0 hyperliquid-python-sdk>=0.22.0
+
 # OpenSpec (spec-driven development framework)
 RUN npm install -g @fission-ai/openspec@latest
 
