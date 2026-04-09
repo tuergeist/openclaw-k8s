@@ -60,8 +60,8 @@ RUN ARCH=$(dpkg --print-architecture) && \
 #     chown -R node:node /home/node/.cache/ms-playwright
 
 # Python dependencies for trading bot
-RUN pip3 install --break-system-packages numpy>=2.0.0 requests>=2.33.0 gspread>=6.0.0 \
-    google-auth>=2.0.0 eth-account>=0.13.0 hyperliquid-python-sdk>=0.22.0
+COPY requirements-trading.txt /tmp/
+RUN pip3 install --break-system-packages -r /tmp/requirements-trading.txt && rm /tmp/requirements-trading.txt
 
 # OpenSpec (spec-driven development framework)
 RUN npm install -g @fission-ai/openspec@latest
